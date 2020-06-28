@@ -1,5 +1,6 @@
 import 'package:chatpadapp/constants.dart';
 import 'package:chatpadapp/screen/contacts_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class StatusScreen extends StatefulWidget {
@@ -9,6 +10,28 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
+  final _auth = FirebaseAuth.instance;
+  FirebaseUser loggedInUser;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getCurrentUser();
+    super.initState();
+  }
+
+  void getCurrentUser() async {
+    try {
+      final user = await _auth.currentUser();
+      if (user != null) {
+        loggedInUser = user;
+        print(loggedInUser.email);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var deviceSize = MediaQuery.of(context).size;
@@ -94,7 +117,7 @@ class _StatusScreenState extends State<StatusScreen> {
                       Container(
                         width: 120,
                         child: Text(
-                          'username',
+                          'email',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Stardos',

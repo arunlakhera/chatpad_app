@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "998026875715",
+    "firebase_url": "https://chatpad-d5ad7.firebaseio.com",
+    "project_id": "chatpad-d5ad7",
+    "storage_bucket": "chatpad-d5ad7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998026875715:android:85ee28a692fd2d85ca95f6",
+        "android_client_info": {
+          "package_name": "com.arunlakhera.chatpadapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "998026875715-906ohtm1gjcg8hgilrlj0jordnoniars.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzYV-uaWVegpmuYs_wiA63IYqVD7cF29o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "998026875715-906ohtm1gjcg8hgilrlj0jordnoniars.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

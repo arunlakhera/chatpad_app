@@ -1,6 +1,10 @@
 import 'package:chatpadapp/constants.dart';
 import 'package:chatpadapp/screen/status_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'login';
@@ -10,7 +14,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String userName;
+  final _auth = FirebaseAuth.instance;
+  String emailId;
   String password;
   TextEditingController controllerType;
 
@@ -60,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    //UserName TextField
+                    //Email TextField
                     Container(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
                       padding: EdgeInsets.only(left: 10, right: 10),
@@ -74,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Row(
                           children: [
                             Text(
-                              'username:\\',
+                              'email:\\',
                               style: TextStyle(
                                 color: kTextGreen,
                                 fontSize: 16,
@@ -83,12 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: TextField(
+                                keyboardType: TextInputType.emailAddress,
                                 autofocus: true,
                                 textAlign: TextAlign.start,
                                 style: TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'Enter username here',
+                                  hintText: 'enter email here',
                                   hintStyle: TextStyle(
                                     fontSize: 18,
                                     color: Colors.grey.shade600,
@@ -98,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       EdgeInsets.symmetric(horizontal: 2),
                                 ),
                                 onChanged: (newText) {
-                                  userName = newText;
+                                  emailId = newText;
                                 },
                               ),
                             ),
@@ -211,10 +217,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     //Button to login or signup or forgot password
                     FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          Navigator.pushNamed(context, StatusScreen.id);
-                        });
+                      onPressed: () async {
+                        try {
+                          final newUser =
+                              await _auth.createUserWithEmailAndPassword(
+                                  email: emailId, password: password);
+
+                          if (newUser != null) {
+                            Navigator.pushNamed(context, StatusScreen.id);
+                          }
+                        } catch (e) {
+                          print(e);
+                        }
                       },
                       textColor: Colors.black,
                       color: kWindowBackground,
@@ -236,13 +250,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Divider(thickness: 1, color: Colors.grey.shade500),
-                        Text(
-                          'Help',
-                          style: Theme.of(context)
+                        TypewriterAnimatedTextKit(
+                          speed: Duration(seconds: 1),
+                          totalRepeatCount: 5,
+                          text: [
+                            'Help',
+                          ],
+                          textStyle: Theme.of(context)
                               .textTheme
                               .bodyText2
                               .copyWith(color: kTextWhite),
                         ),
+
                         // Instruction 1
                         RichText(
                           text: TextSpan(
