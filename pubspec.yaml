@@ -1,0 +1,37 @@
+name: chatpadapp
+description: A new Flutter application.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.3
+  progress_indicators: ^0.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: Stardos
+      fonts:
+        - asset: assets/fonts/StardosStencil-Regular.ttf
+
+    - family: TypeWriter
+      fonts:
+        - asset: assets/fonts/rm_typerighter.ttf
+
