@@ -16,12 +16,15 @@ class _ContactScreenState extends State<ContactScreen> {
   final _firestore = Firestore.instance;
   final _auth = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
+  List<UsersListWidget> usersWidgets = [];
+  String connectionEmail;
+
+  TextEditingController controllerType;
 
   @override
   void initState() {
     super.initState();
     getCurrentUser();
-    //getUsers();
     usersStream();
   }
 
@@ -80,7 +83,7 @@ class _ContactScreenState extends State<ContactScreen> {
                   ));
                 }
                 final usersSnapshot = snapshot.data.documents;
-                List<UsersListWidget> usersWidgets = [];
+
                 int userCount = 0;
                 for (var user in usersSnapshot) {
                   userCount++;
@@ -127,7 +130,7 @@ class _ContactScreenState extends State<ContactScreen> {
                             autofocus: true,
                             textAlign: TextAlign.start,
                             keyboardType: TextInputType.phone,
-                            //controller: controllerType,
+                            controller: controllerType,
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -146,15 +149,29 @@ class _ContactScreenState extends State<ContactScreen> {
                                   EdgeInsets.symmetric(horizontal: 2),
                             ),
                             onChanged: (newText) {
-                              //controllerType =TextEditingController(text: newText);
+                              controllerType =
+                                  TextEditingController(text: newText);
                             },
                           ),
                         ),
                         FlatButton(
                           onPressed: () {
-                            setState(() {
-                              Navigator.pushNamed(context, ChatScreen.id);
-                            });
+                            int index;
+                            try {
+                              index = int.parse(controllerType.text);
+                              connectionEmail =
+                                  usersWidgets.elementAt(index - 1).userEmailId;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                      connectionEmailId: connectionEmail),
+                                ),
+                              );
+                            } catch (e) {
+                              print(e);
+                            }
                           },
                           textColor: Colors.black,
                           color: kWindowBackground,
@@ -163,7 +180,7 @@ class _ContactScreenState extends State<ContactScreen> {
                             horizontal: 30,
                           ),
                           child: Text(
-                            'Enter',
+                            'Connect',
                             style: TextStyle(fontSize: 15),
                           ),
                         ),
@@ -199,11 +216,18 @@ class UsersListWidget extends StatelessWidget {
             children: [
               Text(
                 '$count). ',
-                style: TextStyle(color: Colors.white, fontSize: 25),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontFamily: 'TypeWriter'),
               ),
               Text(
                 userEmailId,
-                style: TextStyle(color: Colors.white, fontSize: 25),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontFamily: 'TypeWriter',
+                ),
               ),
             ],
           ),
