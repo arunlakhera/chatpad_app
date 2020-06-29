@@ -1,37 +1,24 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:chatpadapp/constants.dart';
-import 'package:chatpadapp/screen/contacts_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class StatusScreen extends StatefulWidget {
   static const String id = 'status_screen';
+  final String emailMessage;
+  final String passwordMessage;
+  final String actionMessage;
+
+  StatusScreen({
+    this.emailMessage,
+    this.passwordMessage,
+    this.actionMessage,
+  });
+
   @override
   _StatusScreenState createState() => _StatusScreenState();
 }
 
 class _StatusScreenState extends State<StatusScreen> {
-  final _auth = FirebaseAuth.instance;
-  FirebaseUser loggedInUser;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    getCurrentUser();
-    super.initState();
-  }
-
-  void getCurrentUser() async {
-    try {
-      final user = await _auth.currentUser();
-      if (user != null) {
-        loggedInUser = user;
-        print(loggedInUser.email);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     var deviceSize = MediaQuery.of(context).size;
@@ -40,7 +27,10 @@ class _StatusScreenState extends State<StatusScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {});
+              Navigator.pop(context);
+            },
             icon: Icon(
               Icons.arrow_back_ios,
               color: Colors.white,
@@ -107,7 +97,6 @@ class _StatusScreenState extends State<StatusScreen> {
                 ),
                 SizedBox(height: 20),
                 Divider(thickness: 1, color: Colors.grey.shade500),
-
                 // username Status
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
@@ -117,7 +106,7 @@ class _StatusScreenState extends State<StatusScreen> {
                       Container(
                         width: 120,
                         child: Text(
-                          'email',
+                          'Email',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Stardos',
@@ -127,7 +116,15 @@ class _StatusScreenState extends State<StatusScreen> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      Icon(Icons.check, color: kTextGreen),
+                      widget.emailMessage == 'success'
+                          ? Icon(
+                              Icons.check,
+                              color: Colors.white,
+                            )
+                          : Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
                     ],
                   ),
                 ),
@@ -139,7 +136,7 @@ class _StatusScreenState extends State<StatusScreen> {
                       Container(
                         width: 120,
                         child: Text(
-                          'password',
+                          'Password',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Stardos',
@@ -149,7 +146,15 @@ class _StatusScreenState extends State<StatusScreen> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      Icon(Icons.check, color: kTextGreen),
+                      widget.passwordMessage == 'success'
+                          ? Icon(
+                              Icons.check,
+                              color: Colors.white,
+                            )
+                          : Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
                     ],
                   ),
                 ),
@@ -161,7 +166,7 @@ class _StatusScreenState extends State<StatusScreen> {
                       Container(
                         width: 120,
                         child: Text(
-                          'status',
+                          'Action',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Stardos',
@@ -171,30 +176,114 @@ class _StatusScreenState extends State<StatusScreen> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      Icon(Icons.check, color: kTextGreen),
+                      widget.actionMessage == 'success'
+                          ? Icon(
+                              Icons.check,
+                              color: Colors.white,
+                            )
+                          : Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
                     ],
                   ),
                 ),
                 SizedBox(height: 20),
-                Divider(thickness: 1, color: Colors.grey.shade500),
-                SizedBox(height: 40),
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      Navigator.pushNamed(context, ContactScreen.id);
-                    });
-                  },
-                  textColor: Colors.black,
-                  color: kWindowBackground,
-                  padding: EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 30,
-                  ),
-                  child: Text(
-                    'Continue...',
-                    style: TextStyle(fontSize: 15),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        child: Text(
+                          'Reason',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontFamily: 'Stardos',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      widget.emailMessage != 'success'
+                          ? TypewriterAnimatedTextKit(
+                              speed: Duration(milliseconds: 150),
+                              totalRepeatCount: 5,
+                              text: [
+                                widget.emailMessage,
+                              ],
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(color: kTextWhite),
+                            )
+                          : Visibility(visible: false, child: Text('-')),
+                      widget.passwordMessage != 'success'
+                          ? TypewriterAnimatedTextKit(
+                              speed: Duration(milliseconds: 150),
+                              totalRepeatCount: 5,
+                              text: [
+                                widget.passwordMessage,
+                              ],
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(color: kTextWhite),
+                            )
+                          : Visibility(visible: false, child: Text('-')),
+                      widget.actionMessage != 'success'
+                          ? RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Invalid Action - ',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Stardos',
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Action can only have ',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Stardos',
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'login',
+                                    style: TextStyle(
+                                      color: kTextGreen,
+                                      fontFamily: 'Stardos',
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' or ',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Stardos',
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'create.',
+                                    style: TextStyle(
+                                      color: kTextGreen,
+                                      fontFamily: 'Stardos',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Visibility(
+                              visible: false,
+                              child: Text('-'),
+                            ),
+                    ],
                   ),
                 ),
+                Divider(thickness: 1, color: Colors.grey.shade500),
+                SizedBox(height: 20),
               ],
             ),
           ),

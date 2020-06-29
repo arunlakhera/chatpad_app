@@ -1,5 +1,9 @@
 import 'package:chatpadapp/constants.dart';
+import 'package:chatpadapp/model/firebase_auth_helper.dart';
 import 'package:chatpadapp/screen/chat_screen.dart';
+import 'package:chatpadapp/screen/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ContactScreen extends StatefulWidget {
@@ -9,6 +13,37 @@ class ContactScreen extends StatefulWidget {
 }
 
 class _ContactScreenState extends State<ContactScreen> {
+  final _firestore = Firestore.instance;
+  final _auth = FirebaseAuth.instance;
+  FirebaseUser loggedInUser;
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+    //getUsers();
+    usersStream();
+  }
+
+  void getCurrentUser() async {
+    try {
+      final user = await _auth.currentUser();
+      if (user != null) {
+        loggedInUser = user;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void usersStream() async {
+    await for (var snapshot in _firestore.collection('users').snapshots()) {
+      for (var usersSnapshot in snapshot.documents) {
+        print(usersSnapshot.data.values);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -16,6 +51,10 @@ class _ContactScreenState extends State<ContactScreen> {
         appBar: AppBar(
           backgroundColor: kWindowBackground,
           leading: IconButton(
+            onPressed: () {
+              FirebaseAuthHelper().logout();
+              Navigator.pushNamed(context, LoginScreen.id);
+            },
             icon: Icon(
               Icons.close,
               color: Colors.red.shade900,
@@ -27,267 +66,147 @@ class _ContactScreenState extends State<ContactScreen> {
             style: TextStyle(color: Colors.black),
           ),
         ),
-        body: Stack(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ListView(
-              scrollDirection: Axis.vertical,
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 1',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-                ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: Text(
-                    '2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  title: Text(
-                    'Jane Doe 2',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontFamily: 'Stardos'),
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30,
-                  ),
-                ),
-                Divider(thickness: 2, color: Colors.grey.shade500),
-              ],
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                color: Colors.black,
-                child: Column(
-                  children: [
-                    Divider(
-                      thickness: 1,
-                      color: kTextGreen,
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('users').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                      child: CircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                  ));
+                }
+                final usersSnapshot = snapshot.data.documents;
+                List<UsersListWidget> usersWidgets = [];
+                int userCount = 0;
+                for (var user in usersSnapshot) {
+                  userCount++;
+                  final userEmail = user.data['email'];
+
+                  final userWidget =
+                      UsersListWidget(count: userCount, userEmailId: userEmail);
+                  usersWidgets.add(userWidget);
+                }
+                return Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 10,
                     ),
-                    Container(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      color: Colors.black,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'CP:\\open ',
+                    children: usersWidgets,
+                  ),
+                );
+              },
+            ),
+            Container(
+              color: Colors.black,
+              child: Column(
+                children: [
+                  Divider(
+                    thickness: 1,
+                    color: kTextGreen,
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    color: Colors.black,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'CP:\\open ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Stardos',
+                            fontSize: 20,
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            autofocus: true,
+                            textAlign: TextAlign.start,
+                            keyboardType: TextInputType.phone,
+                            //controller: controllerType,
                             style: TextStyle(
                               color: Colors.white,
+                              fontWeight: FontWeight.bold,
                               fontFamily: 'Stardos',
                               fontSize: 20,
                             ),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              autofocus: true,
-                              textAlign: TextAlign.start,
-                              //controller: controllerType,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: '1',
+                              hintStyle: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey.shade600,
                                 fontFamily: 'Stardos',
-                                fontSize: 20,
                               ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '1',
-                                hintStyle: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey.shade600,
-                                  fontFamily: 'Stardos',
-                                ),
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 2),
-                              ),
-                              onChanged: (newText) {
-                                //controllerType =TextEditingController(text: newText);
-                              },
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 2),
                             ),
-                          ),
-                          FlatButton(
-                            onPressed: () {
-                              setState(() {
-                                Navigator.pushNamed(context, ChatScreen.id);
-                              });
+                            onChanged: (newText) {
+                              //controllerType =TextEditingController(text: newText);
                             },
-                            textColor: Colors.black,
-                            color: kWindowBackground,
-                            padding: EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 30,
-                            ),
-                            child: Text(
-                              'Enter',
-                              style: TextStyle(fontSize: 15),
-                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                        FlatButton(
+                          onPressed: () {
+                            setState(() {
+                              Navigator.pushNamed(context, ChatScreen.id);
+                            });
+                          },
+                          textColor: Colors.black,
+                          color: kWindowBackground,
+                          padding: EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 30,
+                          ),
+                          child: Text(
+                            'Enter',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class UsersListWidget extends StatelessWidget {
+  final String userEmailId;
+  final int count;
+  UsersListWidget({this.count, this.userEmailId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Material(
+        color: Colors.black,
+        elevation: 5,
+        shadowColor: Colors.grey.shade500,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          child: Row(
+            children: [
+              Text(
+                '$count). ',
+                style: TextStyle(color: Colors.white, fontSize: 25),
+              ),
+              Text(
+                userEmailId,
+                style: TextStyle(color: Colors.white, fontSize: 25),
+              ),
+            ],
+          ),
         ),
       ),
     );
