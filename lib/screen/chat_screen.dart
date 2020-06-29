@@ -1,28 +1,30 @@
 import 'package:chatpadapp/constants.dart';
-import 'package:chatpadapp/model/firebase_auth_helper.dart';
-import 'package:chatpadapp/screen/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+final _firestore = Firestore.instance;
+FirebaseUser loggedInUser;
+String connEmailId;
+
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_Screen';
 
-  final String connectionEmailId;
-  ChatScreen({this.connectionEmailId});
+  ChatScreen({String connectionEmailId}) {
+    connEmailId = connectionEmailId;
+  }
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _firestore = Firestore.instance;
   final _auth = FirebaseAuth.instance;
-  FirebaseUser loggedInUser;
-  List<UsersListWidget> usersWidgets = [];
-  String connectionEmail;
 
-  TextEditingController controllerType;
+  String connectionEmail;
+  String messageText;
+
+  TextEditingController messageTextController = TextEditingController();
 
   @override
   void initState() {
@@ -75,36 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('users').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                      child: CircularProgressIndicator(
-                    backgroundColor: Colors.white,
-                  ));
-                }
-                final usersSnapshot = snapshot.data.documents;
-
-                int userCount = 0;
-                for (var user in usersSnapshot) {
-                  userCount++;
-                  final userEmail = user.data['email'];
-
-                  final userWidget =
-                      UsersListWidget(count: userCount, userEmailId: userEmail);
-                  usersWidgets.add(userWidget);
-                }
-                return Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 10,
-                    ),
-                    children: usersWidgets,
-                  ),
-                );
-              },
-            ),
+            MessagesStream(),
             Container(
               color: Colors.black,
               child: Column(
@@ -119,71 +92,38 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'CP:\\open ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Stardos',
-                            fontSize: 20,
-                          ),
-                        ),
                         Expanded(
                           child: TextField(
-                            autofocus: true,
-                            textAlign: TextAlign.start,
-                            keyboardType: TextInputType.phone,
-                            controller: controllerType,
+                            controller: messageTextController,
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'Stardos',
-                              fontSize: 20,
+                              fontSize: 18.0,
                             ),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '1',
-                              hintStyle: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey.shade600,
-                                fontFamily: 'Stardos',
-                              ),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 2),
-                            ),
-                            onChanged: (newText) {
-                              controllerType =
-                                  TextEditingController(text: newText);
+                            onChanged: (value) {
+                              messageText = value;
                             },
                           ),
                         ),
                         FlatButton(
                           onPressed: () {
-                            int index;
-                            try {
-                              index = int.parse(controllerType.text);
-                              connectionEmail =
-                                  usersWidgets.elementAt(index - 1).userEmailId;
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                      connectionEmailId: connectionEmail),
-                                ),
-                              );
-                            } catch (e) {
-                              print(e);
-                            }
+                            messageTextController.clear();
+                            _firestore.collection('messages').add(
+                              {
+                                'message': messageText,
+                                'sender': loggedInUser.email,
+                                'receiver': connectionEmail,
+                              },
+                            );
                           },
-                          textColor: Colors.black,
                           color: kWindowBackground,
-                          padding: EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 30,
-                          ),
                           child: Text(
-                            'Connect',
-                            style: TextStyle(fontSize: 15),
+                            'Send',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
                           ),
                         ),
                       ],
@@ -199,41 +139,79 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class UsersListWidget extends StatelessWidget {
-  final String userEmailId;
-  final int count;
-  UsersListWidget({this.count, this.userEmailId});
+class MessagesStream extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: _firestore.collection('messages').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+              child: CircularProgressIndicator(
+            backgroundColor: Colors.white,
+          ));
+        }
+        final messages = snapshot.data.documents.reversed;
+        List<MessageWidget> messageWidgets = [];
+        for (var message in messages) {
+          final messageText = message.data['message'];
+          final messageSender = message.data['sender'];
+          final messageReceiver = message.data['receiver'];
+          print(messageReceiver);
+
+          final currentUser = loggedInUser.email;
+          final messageWidget = MessageWidget(
+            sender: messageSender,
+            text: messageText,
+            isMe: currentUser == messageSender ? true : false,
+          );
+          messageWidgets.add(messageWidget);
+        }
+        return Expanded(
+          child: ListView(
+            reverse: true,
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            children: messageWidgets,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class MessageWidget extends StatelessWidget {
+  final String sender;
+  final String text;
+  final bool isMe;
+
+  MessageWidget({this.sender, this.text, this.isMe});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(10.0),
-      child: Material(
-        color: Colors.black,
-        elevation: 5,
-        shadowColor: Colors.grey.shade500,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          child: Row(
-            children: [
-              Text(
-                '$count). ',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontFamily: 'TypeWriter'),
-              ),
-              Text(
-                userEmailId,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 40,
-                  fontFamily: 'TypeWriter',
-                ),
-              ),
-            ],
+      child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            sender,
+            style: TextStyle(
+                color: Colors.grey, fontSize: 12, fontFamily: 'Stardos'),
           ),
-        ),
+          Material(
+            borderRadius: BorderRadius.circular(30),
+            elevation: 5,
+            color: kWindowBackground,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Text(
+                '$text',
+                style: TextStyle(fontSize: 20, color: Colors.black),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
